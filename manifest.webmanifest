@@ -1,0 +1,10 @@
+{
+  "name": "Biblia Challenge – Bethel Cloppenburg",
+  "short_name": "Biblia Challenge",
+  "lang": "ro",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f4ee",
+  "theme_color": "#173b32",
+  "icons": []
+}
