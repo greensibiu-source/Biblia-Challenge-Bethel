@@ -63,6 +63,12 @@ function showSetup() {
     <section class="panel">
       <h3>Cont participant</h3>
 
+      <button type="button" id="google-login" class="google-button">
+        Continuă cu Google
+      </button>
+
+      <p class="muted" style="text-align:center">sau folosește e-mailul</p>
+
       <form id="auth-form">
         <label>
           Nume de utilizator
@@ -93,6 +99,8 @@ function showSetup() {
     </section>
   `);
 
+  document.querySelector('#google-login').addEventListener('click', googleAuth);
+
   const form = document.querySelector('#auth-form');
   form.dataset.mode = 'signup';
 
@@ -101,9 +109,37 @@ function showSetup() {
   document.querySelector('#login').addEventListener('click', () => {
     form.dataset.mode = 'login';
     form.querySelector('button[type="submit"]').textContent = 'Autentificare';
+    form.querySelector('[name="username"]').required = false;
+    form.querySelector('[name="username"]').parentElement.style.display = 'none';
+
     document.querySelector('#message').textContent =
       'Introdu e-mailul și parola contului existent.';
   });
+}
+
+async function googleAuth() {
+  const message = document.querySelector('#message');
+
+  if (!supabase) {
+    message.textContent = 'Conexiunea Supabase nu este disponibilă.';
+    return;
+  }
+
+  message.textContent = 'Se deschide autentificarea Google...';
+
+  const redirectTo =
+    `${window.location.origin}${import.meta.env.BASE_URL}`;
+
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo
+    }
+  });
+
+  if (error) {
+    message.textContent = 'Eroare Google: ' + error.message;
+  }
 }
 
 async function auth(e) {
