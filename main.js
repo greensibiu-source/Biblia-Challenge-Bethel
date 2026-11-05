@@ -666,21 +666,110 @@ async function renderLevelQuestions(levelId) {
     });
   }
 
-  function showResult() {
+  
+  async function showResult() {
+    list.innerHTML = '<div class="notice">Se verifică răspunsurile...</div>';
+
+    const submittedAnswers = data.map((q, i) => ({
+      question_id: q.id,
+      selected_option: answers[i]
+    }));
+
+    const { data: result, error } = await supabase.rpc(
+      'submit_level_attempt',
+      {
+        p_level_id: Number(levelId),
+        p_answers: submittedAnswers
+      }
+    );
+
+    if (error) {
+      list.innerHTML = `
+        <div class="notice">Nu s-a putut calcula rezultatul: ${escapeHtml(error.message)}</div>
+        <button type="button" id="try-result">Încearcă din nou</button>
+      `;
+      list.querySelector('#try-result').addEventListener('click', showResult);
+      return;
+    }
+
+    const score = Number(result.score);
+    const passed = result.passed;
+    const angle = -90 + (score / 210) * 180;
+    const radians = angle * Math.PI / 180;
+    const needleX = 160 + 105 * Math.cos(radians);
+    const needleY = 145 + 105 * Math.sin(radians);
+
     list.innerHTML = `
-      <article class="question-preview">
-        <h2>Felicitări! Ai terminat testul!</h2>
-        <h3>${answers.filter(a => a !== null).length} din ${data.length} întrebări completate.</h3>
-        <p>Poți reveni asupra răspunsurilor sau poți relua testul.</p>
-        <button type="button" id="review-quiz">Revizuiește răspunsurile</button>
-        <button type="button" id="restart-quiz" class="secondary">Reia testul</button>
+      <article class="question-preview" style="text-align:center;padding:20px">
+        <h2>Rezultatul tău</h2>
+
+        <svg viewBox="0 0 320 185" width="100%" style="max-width:400px">
+          <path d="M35 145 A125 125 0 0 1 285 145"
+            fill="none" stroke="#dc2626" stroke-width="19"
+            stroke-linecap="round"/>
+          <path d="M160 20 A125 125 0 0 1 285 145"
+            fill="none" stroke="#16a34a" stroke-width="19"
+            stroke-linecap="round"/>
+          <path d="M160 145 L${needleX} ${needleY}"
+            stroke="currentColor" stroke-width="5"
+            stroke-linecap="round"/>
+          <circle cx="160" cy="145" r="10" fill="currentColor"/>
+          <g fill="currentColor" font-size="12" text-anchor="middle">
+            <text x="30" y="170">0</text>
+            <text x="160" y="12">105</text>
+            <text x="290" y="170">210</text>
+          </g>
+        </svg>
+
+        <h1 style="font-size:38px;margin:0">${score} / 210</h1>
+
+        <h2 style="color:${passed ? '#16a34a' : '#dc2626'}">
+          ${passed ? 'PROMOVAT!' : 'RESPINS!'}
+        </h2>
+
+        <p>${result.correct_count} răspunsuri corecte din ${result.total_questions}</p>
+        <p>Prag de promovare: ${result.pass_score} puncte</p>
+
+        <button type="button" id="show-review">
+          Vezi răspunsurile
+        </button>
       </article>
     `;
 
-    list.querySelector('#review-quiz').addEventListener('click', () => {
-      current = 0;
-      showQuestion();
+    list.querySelector('#show-review').addEventListener('click', () => {
+      const review = result.review || [];
+
+      list.innerHTML = `
+        <h2>Verificarea răspunsurilor</h2>
+        ${data.map((q, index) => {
+          const item = review.find(r => Number(r.question_id) === Number(q.id));
+          return `
+            <article class="question-preview" style="margin:15px 0;padding:15px">
+              <h3>${index + 1}. ${escapeHtml(q.prompt)}</h3>
+              ${q.options.map((option, i) => {
+                const correct = Number(item.correct_option) === i;
+                const wrong = Number(item.selected_option) === i && !correct;
+                const border = correct ? '#16a34a' : wrong ? '#dc2626' : '#ccc';
+                return `
+                  <div style="border:2px solid ${border};border-radius:10px;padding:12px;margin:8px 0">
+                    ${String.fromCharCode(65 + i)}. ${escapeHtml(option)}
+                  </div>
+                `;
+              }).join('')}
+            </article>
+          `;
+        }).join('')}
+        <button type="button" id="restart-quiz">Reia testul</button>
+      `;
+
+      list.querySelector('#restart-quiz').addEventListener('click', () => {
+        current = 0;
+        answers.fill(null);
+        showQuestion();
+      });
     });
+  }
+
 
     list.querySelector('#restart-quiz').addEventListener('click', () => {
       current = 0;
