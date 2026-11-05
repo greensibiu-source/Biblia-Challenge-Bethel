@@ -805,7 +805,7 @@ async function logout() {
     alert('Nu s-a putut realiza deconectarea: ' + error.message);
     return;
   
-
+}
   user = null;
   profile = null;
   leaders = [];
