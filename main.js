@@ -353,7 +353,291 @@ async function dashboard() {
   renderHome();
 }
 
+
+const dailyVerses = [
+  {
+    text: "Cercetați Scripturile, căci credeți că în ele aveți viața veșnică; și ele sunt cele care mărturisesc despre Mine.",
+    ref: "Ioan 5:39"
+  },
+  {
+    text: "În toate lucrurile Dumnezeu lucrează împreună spre binele celor ce-L iubesc pe Dumnezeu.",
+    ref: "Romani 8:28"
+  },
+  {
+    text: "Domnul este adăpostul și sprijinul nostru, un ajutor care nu lipsește niciodată în nevoi.",
+    ref: "Psalmul 46:1"
+  },
+  {
+    text: "Cuvântul Tău este o candelă pentru picioarele mele și o lumină pe cărarea mea.",
+    ref: "Psalmul 119:105"
+  },
+  {
+    text: "Pot totul în Hristos, care mă întărește.",
+    ref: "Filipeni 4:13"
+  },
+  {
+    text: "Încrede-te în Domnul din toată inima ta.",
+    ref: "Proverbele 3:5"
+  }
+];
+
+function dailySeed(salt = "") {
+  const d = new Date();
+  const key = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}-${salt}`;
+  let h = 2166136261;
+  for (const c of key) {
+    h = Math.imul(h ^ c.charCodeAt(0), 16777619);
+  }
+  return h >>> 0;
+}
+
+function dailyShuffle(items, salt = "") {
+  const result = [...items];
+  let seed = dailySeed(salt);
+
+  for (let i = result.length - 1; i > 0; i--) {
+    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+    const j = seed % (i + 1);
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+
+  return result;
+}
+
 function renderHome() {
+  const username = profile?.username || user?.email || "Participant";
+  const verse = dailyVerses[dailySeed("verse") % dailyVerses.length];
+  const total = myStats.correct + myStats.wrong;
+  const accuracy = total ? Math.round(myStats.correct / total * 100) : 0;
+  const progress = Math.max(0, Math.min(100, myStats.progress || 0));
+
+  shell(`
+    <section class="welcome-heading">
+      <span class="eyebrow">BINE AI REVENIT</span>
+      <h2>Bun venit, ${escapeHtml(username)}!</h2>
+      <p>Crește în cunoașterea Cuvântului lui Dumnezeu.</p>
+    </section>
+
+    <section class="panel progress-card">
+      <span class="eyebrow">EVOLUȚIA TA</span>
+      <h3>Progresul tău</h3>
+
+      <div class="progress-overview">
+        <div class="progress-ring"
+          style="--progress:${progress * 3.6}deg">
+          <div>
+            <strong>${progress}%</strong>
+            <small>progres</small>
+          </div>
+        </div>
+
+        <div class="progress-summary">
+          <strong>${myStats.passedLevels}</strong>
+          <span>Niveluri promovate</span>
+          <small>din 1320 niveluri</small>
+        </div>
+      </div>
+
+      <div class="progress-track">
+        <span style="width:${progress}%"></span>
+      </div>
+
+      <div class="progress-stats">
+        <div><b>${myStats.correct}</b><span>✓ Corecte</span></div>
+        <div><b>${myStats.wrong}</b><span>✕ Greșite</span></div>
+        <div><b>${myStats.games}</b><span>Jocuri jucate</span></div>
+        <div><b>${accuracy}%</b><span>Precizie</span></div>
+      </div>
+    </section>
+
+    <section class="game-categories">
+      <article class="category-card quiz-feature">
+        <div class="category-icon">📖</div>
+        <span class="eyebrow">MOD PRINCIPAL</span>
+        <h3>Quiz Biblic</h3>
+        <p>Întrebări din toată Biblia.</p>
+        <button type="button" data-page="game">
+          Joacă acum →
+        </button>
+      </article>
+
+      <article class="category-card locked-feature">
+        <div class="category-icon">🔒</div>
+        <span class="eyebrow">DISPONIBIL ÎN CURÂND</span>
+        <h3>Adevărat sau Fals</h3>
+        <p>Acest mod este momentan blocat.</p>
+        <button type="button" disabled>
+          🔒 Blocat momentan
+        </button>
+      </article>
+
+      <article class="category-card quick-feature">
+        <div class="category-icon">⚡</div>
+        <span class="eyebrow">EDIȚIA ZILEI</span>
+        <h3>Provocare rapidă</h3>
+        <p>10 întrebări aleatorii din toată Biblia.</p>
+        <button type="button" id="daily-challenge">
+          Începe provocarea →
+        </button>
+      </article>
+    </section>
+
+    <section class="panel verse-card">
+      <span class="eyebrow">CUVÂNTUL LUI DUMNEZEU</span>
+      <h3>✦ Versetul zilei</h3>
+      <blockquote>„${escapeHtml(verse.text)}”</blockquote>
+      <strong>${escapeHtml(verse.ref)}</strong>
+      <small>Verset nou în fiecare zi.</small>
+    </section>
+  `);
+
+  document.querySelector("#daily-challenge")
+    ?.addEventListener("click", startDailyChallenge);
+}
+
+async function startDailyChallenge() {
+  const button = document.querySelector("#daily-challenge");
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = "Se încarcă...";
+  }
+
+  const { data, error } = await supabase
+    .from("questions")
+    .select("id,prompt,options,correct_option,bible_reference,explanation")
+    .eq("active", true);
+
+  if (error || !data || data.length < 10) {
+    alert("Nu am putut încărca întrebările.");
+    renderHome();
+    return;
+  }
+
+  const questions = dailyShuffle(data, "quiz").slice(0, 10);
+  renderDailyQuiz(questions);
+}
+
+function renderDailyQuiz(questions) {
+  currentPage = "daily";
+
+  let index = 0;
+  const answers = Array(10).fill(null);
+
+  shell(`
+    <section class="panel daily-quiz-panel">
+      <button type="button" id="daily-back" class="secondary">
+        ← Înapoi
+      </button>
+      <span class="eyebrow">PROVOCAREA ZILEI</span>
+      <h2>10 întrebări biblice</h2>
+      <div id="daily-question"></div>
+    </section>
+  `);
+
+  document.querySelector("#daily-back").onclick = () => {
+    currentPage = "home";
+    renderHome();
+  };
+
+  const area = document.querySelector("#daily-question");
+
+  function showQuestion() {
+    const q = questions[index];
+    const options = Array.isArray(q.options) ? q.options : [];
+
+    area.innerHTML = `
+      <div class="daily-progress-label">
+        <b>Întrebarea ${index + 1} din 10</b>
+      </div>
+
+      <div class="progress-track">
+        <span style="width:${(index + 1) * 10}%"></span>
+      </div>
+
+      <h3>${escapeHtml(q.prompt)}</h3>
+      <small>${escapeHtml(q.bible_reference || "")}</small>
+
+      <div class="daily-options">
+        ${options.map((option, i) => `
+          <button type="button"
+            class="daily-option ${answers[index] === i ? "selected" : ""}"
+            data-answer="${i}">
+            <span>${String.fromCharCode(65 + i)}</span>
+            ${escapeHtml(option)}
+          </button>
+        `).join("")}
+      </div>
+
+      <button type="button" id="daily-next"
+        ${answers[index] === null ? "disabled" : ""}>
+        ${index === 9 ? "Finalizează" : "Următoarea întrebare →"}
+      </button>
+    `;
+
+    area.querySelectorAll("[data-answer]").forEach(btn => {
+      btn.onclick = () => {
+        answers[index] = Number(btn.dataset.answer);
+        showQuestion();
+      };
+    });
+
+    area.querySelector("#daily-next").onclick = () => {
+      if (answers[index] === null) return;
+
+      if (index < 9) {
+        index++;
+        showQuestion();
+      } else {
+        showResult();
+      }
+    };
+  }
+
+  function showResult() {
+    const score = questions.reduce((sum, q, i) =>
+      sum + (Number(q.correct_option) === answers[i] ? 1 : 0), 0
+    );
+
+    area.innerHTML = `
+      <div class="daily-result">
+        <div class="result-star">✦</div>
+        <span class="eyebrow">PROVOCAREA ÎNCHEIATĂ</span>
+        <h2>${score} / 10</h2>
+        <p>Felicitări! Continuă să cercetezi Scripturile.</p>
+        <button type="button" id="daily-review">
+          Vezi răspunsurile
+        </button>
+      </div>
+    `;
+
+    area.querySelector("#daily-review").onclick = () => {
+      area.innerHTML = questions.map((q, i) => `
+        <article class="daily-review-item">
+          <h3>${i + 1}. ${escapeHtml(q.prompt)}</h3>
+          <p>Răspunsul tău:
+            ${escapeHtml(q.options[answers[i]])}</p>
+          <p class="answer-correct">Corect:
+            ${escapeHtml(q.options[Number(q.correct_option)])}</p>
+          <small>${escapeHtml(q.bible_reference || "")}</small>
+          <p>${escapeHtml(q.explanation || "")}</p>
+        </article>
+      `).join("") + `
+        <button type="button" id="daily-finish">
+          Înapoi acasă
+        </button>
+      `;
+
+      area.querySelector("#daily-finish").onclick = () => {
+        currentPage = "home";
+        renderHome();
+      };
+    };
+  }
+
+  showQuestion();
+}
+
   const username = profile?.username || user?.email || 'Participant';
 
   shell(`
