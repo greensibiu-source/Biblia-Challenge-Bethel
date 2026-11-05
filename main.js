@@ -794,7 +794,6 @@ function renderSimplePage(title, description) {
       <p>${escapeHtml(description)}</p>
     </section>
   `);
-    `);
 }
   
 async function logout() {
