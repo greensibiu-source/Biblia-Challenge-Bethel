@@ -305,9 +305,8 @@ async function dashboard() {
         .maybeSingle(),
 
       supabase
-        .from('leaderboard')
-        .select('username, total_points')
-        .limit(10),
+  .rpc('get_leaderboard')
+  .limit(10),
 
       supabase
         .from('attempts')
