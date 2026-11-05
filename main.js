@@ -559,7 +559,139 @@ async function renderBookLevels(bookId) {
   });
 }
 
+
 async function renderLevelQuestions(levelId) {
+  if (!supabase) return;
+
+  shell(`
+    <section class="panel">
+      <button type="button" class="secondary" data-back-game>← Înapoi la cărți</button>
+      <span class="eyebrow">QUIZ BIBLIC</span>
+      <h2>Testează-ți cunoștințele!</h2>
+      <div id="questions-status" class="notice">Se încarcă întrebările...</div>
+      <div id="level-questions"></div>
+    </section>
+  `);
+
+  const status = document.querySelector('#questions-status');
+  const list = document.querySelector('#level-questions');
+
+  const { data, error } = await supabase
+    .from('questions')
+    .select('id, prompt, options')
+    .eq('level_id', levelId)
+    .eq('active', true)
+    .order('id', { ascending: true });
+
+  if (error) {
+    status.textContent = 'Eroare: ' + error.message;
+    return;
+  }
+
+  if (!data?.length) {
+    status.textContent = 'Nu există întrebări în acest nivel.';
+    return;
+  }
+
+  status.remove();
+
+  let current = 0;
+  const answers = new Array(data.length).fill(null);
+
+  function showQuestion() {
+    const q = data[current];
+    const options = Array.isArray(q.options) ? q.options : [];
+
+    list.innerHTML = `
+      <p><strong>Întrebarea ${current + 1} din ${data.length}</strong></p>
+
+      <div class="quiz-progress">
+        <span style="display:block;height:8px;background:#27966c;border-radius:8px;width:${(current + 1) / data.length * 100}%"></span>
+      </div>
+
+      <article class="question-preview">
+        <h3>${escapeHtml(q.prompt)}</h3>
+
+        <div class="quiz-options">
+          ${options.map((option, i) => `
+            <button
+              type="button"
+              class="quiz-option ${answers[current] === i ? 'selected' : ''}"
+              data-answer="${i}"
+              style="display:block;width:100%;text-align:left;margin:10px 0;padding:15px;border-radius:12px;border:2px solid ${answers[current] === i ? '#27966c' : '#ccc'};background:${answers[current] === i ? '#e5f5ed' : 'transparent'};color:inherit">
+              <strong>${String.fromCharCode(65 + i)}.</strong>
+              ${escapeHtml(option)}
+              ${answers[current] === i ? ' ✓' : ''}
+            </button>
+          `).join('')}
+        </div>
+      </article>
+
+      <div style="display:flex;gap:10px;margin-top:20px">
+        <button type="button" class="secondary" id="quiz-prev" ${current === 0 ? 'disabled' : ''}>
+          Înapoi
+        </button>
+
+        <button type="button" id="quiz-next" ${answers[current] === null ? 'disabled' : ''}>
+          ${current === data.length - 1 ? 'Finalizează' : 'Următoarea →'}
+        </button>
+      </div>
+
+      <p class="muted">${answers.filter(a => a !== null).length} din ${data.length} răspunsuri selectate</p>
+    `;
+
+    list.querySelectorAll('[data-answer]').forEach(button => {
+      button.addEventListener('click', () => {
+        answers[current] = Number(button.dataset.answer);
+        showQuestion();
+      });
+    });
+
+    list.querySelector('#quiz-prev').addEventListener('click', () => {
+      if (current > 0) {
+        current--;
+        showQuestion();
+      }
+    });
+
+    list.querySelector('#quiz-next').addEventListener('click', () => {
+      if (answers[current] === null) return;
+
+      if (current < data.length - 1) {
+        current++;
+        showQuestion();
+      } else {
+        showResult();
+      }
+    });
+  }
+
+  function showResult() {
+    list.innerHTML = `
+      <article class="question-preview">
+        <h2>Felicitări! Ai terminat testul!</h2>
+        <h3>${answers.filter(a => a !== null).length} din ${data.length} întrebări completate.</h3>
+        <p>Poți reveni asupra răspunsurilor sau poți relua testul.</p>
+        <button type="button" id="review-quiz">Revizuiește răspunsurile</button>
+        <button type="button" id="restart-quiz" class="secondary">Reia testul</button>
+      </article>
+    `;
+
+    list.querySelector('#review-quiz').addEventListener('click', () => {
+      current = 0;
+      showQuestion();
+    });
+
+    list.querySelector('#restart-quiz').addEventListener('click', () => {
+      current = 0;
+      answers.fill(null);
+      showQuestion();
+    });
+  }
+
+  showQuestion();
+}
+
   if (!supabase) return;
 
   shell(`
