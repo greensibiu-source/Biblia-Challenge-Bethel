@@ -769,8 +769,10 @@ async function renderLevelQuestions(levelId) {
         showQuestion();
       });
     });
-}
 
+}
+showQuestion();
+}
 
 
 function renderProfile() {
