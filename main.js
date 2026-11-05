@@ -768,17 +768,6 @@ async function renderLevelQuestions(levelId) {
         showQuestion();
       });
     });
-  }
-
-
-    list.querySelector('#restart-quiz').addEventListener('click', () => {
-      current = 0;
-      answers.fill(null);
-      showQuestion();
-    });
-  }
-
-  showQuestion();
 }
 
 
