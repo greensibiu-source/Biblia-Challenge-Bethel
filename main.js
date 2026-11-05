@@ -540,25 +540,49 @@ async function renderBookLevels(bookId) {
     status.textContent = 'Nu există niveluri asociate acestei cărți.';
     return;
   }
+  const { data: attempts, error: attemptsError } = await supabase
+    .from('attempts')
+    .select('level_id')
+    .eq('passed', true);
+
+  if (attemptsError) {
+    status.textContent = 'Eroare la verificarea promovărilor.';
+    return;
+  }
+
+  const passedLevels = new Set(
+    (attempts || []).map(a => Number(a.level_id))
+  );
 
   status.remove();
-  grid.innerHTML = data.map(level => {
+
+  grid.innerHTML = data.map((level, index) => {
     const number = level.book_level ?? level.level_number ?? level.sort_order ?? level.id;
     const name = level.name || `Nivelul ${number}`;
+    const unlocked = index === 0 ||
+      passedLevels.has(Number(data[index - 1].id));
+
     return `
-      <button type="button" class="level level-button" data-level="${escapeHtml(level.id)}">
+      <button
+        type="button"
+        class="level level-button"
+        data-level="${escapeHtml(level.id)}"
+        ${unlocked ? '' : 'disabled'}
+        style="${unlocked ? '' : 'opacity:0.5;cursor:not-allowed'}"
+      >
         <span>${escapeHtml(number)}</span>
         ${escapeHtml(name)}
-        <small>Deschide nivelul →</small>
+        <small>${unlocked ? 'Deschide nivelul →' : '🔒 Nivel blocat'}</small>
       </button>
     `;
   }).join('');
 
-  grid.querySelectorAll('[data-level]').forEach(button => {
-    button.addEventListener('click', () => renderLevelQuestions(button.dataset.level));
+  grid.querySelectorAll('[data-level]:not(:disabled)').forEach(button => {
+    button.addEventListener('click', () =>
+      renderLevelQuestions(button.dataset.level)
+    );
   });
 }
-
 
 async function renderLevelQuestions(levelId) {
   if (!supabase) return;
