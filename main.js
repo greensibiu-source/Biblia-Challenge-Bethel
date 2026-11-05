@@ -637,7 +637,7 @@ function renderDailyQuiz(questions) {
 
   showQuestion();
 }
-
+function renderHomeOld() {
   const username = profile?.username || user?.email || 'Participant';
 
   shell(`
