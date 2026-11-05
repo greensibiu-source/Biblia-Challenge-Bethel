@@ -682,7 +682,7 @@ async function renderLevelQuestions(levelId) {
         p_answers: submittedAnswers
       }
     );
-    }
+    
 
     if (error) {
       list.innerHTML = `
@@ -796,6 +796,7 @@ function renderSimplePage(title, description) {
   `);
 }
 
+}
 async function logout() {
   if (!supabase) return;
 
