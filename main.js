@@ -793,10 +793,9 @@ function renderSimplePage(title, description) {
       <h2>${escapeHtml(title)}</h2>
       <p>${escapeHtml(description)}</p>
     </section>
-  `);
-}
-
-}
+  `);}
+  
+  
 async function logout() {
   if (!supabase) return;
 
@@ -805,7 +804,7 @@ async function logout() {
   if (error) {
     alert('Nu s-a putut realiza deconectarea: ' + error.message);
     return;
-  }
+  
 
   user = null;
   profile = null;
