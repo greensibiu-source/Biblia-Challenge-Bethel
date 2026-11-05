@@ -692,58 +692,7 @@ async function renderLevelQuestions(levelId) {
   showQuestion();
 }
 
-  if (!supabase) return;
 
-  shell(`
-    <section class="panel">
-      <button type="button" class="secondary" data-back-game>← Înapoi la cărți</button>
-      <span class="eyebrow">ÎNTREBĂRI BIBLICE</span>
-      <h2>Conținutul nivelului</h2>
-      <div class="notice" id="questions-status">Se încarcă întrebările...</div>
-      <div id="level-questions"></div>
-    </section>
-  `);
-
-  const status = document.querySelector('#questions-status');
-  const list = document.querySelector('#level-questions');
-
-  const { data, error } = await supabase
-    .from('questions')
-    .select('id, prompt, options, bible_reference, explanation')
-    .eq('level_id', levelId)
-    .eq('active', true)
-    .order('id', { ascending: true });
-
-  if (error) {
-    status.textContent = `Nu am putut încărca întrebările: ${error.message}`;
-    return;
-  }
-
-  if (!data?.length) {
-    status.textContent = 'Acest nivel nu are încă întrebări active.';
-    return;
-  }
-
-  status.textContent = `${data.length} întrebări găsite.`;
-  list.innerHTML = data.map((question, index) => {
-    const options = Array.isArray(question.options) ? question.options : [];
-    return `
-      <article class="question-preview">
-        <h3>${index + 1}. ${escapeHtml(question.prompt)}</h3>
-        <ol type="A">
-          ${options.map(option => `<li>${escapeHtml(option)}</li>`).join('')}
-        </ol>
-        <small>${escapeHtml(question.bible_reference || '')}</small>
-      </article>
-    `;
-  }).join('') + `
-    <div class="notice">
-      Întrebările sunt încărcate din baza de date. Modul de joc cu cronometru,
-      verificarea răspunsurilor și acordarea punctelor trebuie activat prin
-      funcții securizate în Supabase înainte de a putea începe competiția.
-    </div>
-  `;
-}
 
 function renderProfile() {
   shell(`
