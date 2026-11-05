@@ -14,6 +14,13 @@ const app = document.querySelector('#app');
 let user = null;
 let profile = null;
 let leaders = [];
+let myStats = {
+  games: 0,
+  correct: 0,
+  wrong: 0,
+  passedLevels: 0,
+  progress: 0
+};
 let currentPage = 'home';
 
 const levels = [
