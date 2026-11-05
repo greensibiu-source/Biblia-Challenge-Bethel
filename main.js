@@ -103,9 +103,19 @@ function shell(content) {
   `;
 
   document.querySelectorAll('[data-page]').forEach(button => {
-    button.addEventListener('click', () => {
-      navigate(button.dataset.page);
-    });
+    button.addEventListener('click', () => navigate(button.dataset.page));
+  });
+
+  document.querySelectorAll('[data-book]').forEach(button => {
+    button.addEventListener('click', () => renderBookLevels(button.dataset.book));
+  });
+
+  document.querySelectorAll('[data-level]').forEach(button => {
+    button.addEventListener('click', () => renderLevelQuestions(button.dataset.level));
+  });
+
+  document.querySelectorAll('[data-back-game]').forEach(button => {
+    button.addEventListener('click', () => renderGame());
   });
 
   document.querySelector('#logout')?.addEventListener('click', logout);
@@ -443,24 +453,164 @@ function renderRanking() {
   `);
 }
 
-function renderGame() {
+async function renderGame() {
+  if (!supabase) {
+    showSetup();
+    return;
+  }
+
   shell(`
     <section class="panel">
-      <span class="eyebrow">PREGĂTEȘTE-TE DE JOC</span>
-      <h2>Alege-ți nivelul biblic</h2>
-      <p>Vei parcurge 20 de niveluri, fiecare cu 21 de întrebări.</p>
-      <div class="levels">
-        ${levels.map((name, i) => `
-          <div class="level">
-            <span>${String(i + 1).padStart(2, '0')}</span>
-            ${escapeHtml(name)}
-            <small>${i === 0 ? 'Primul nivel' : 'Se deblochează după promovarea nivelului anterior'}</small>
-          </div>
-        `).join('')}
-      </div>
-      <p class="muted">Jocul va putea fi început după introducerea întrebărilor și activarea sistemului de joc.</p>
+      <span class="eyebrow">BIBLIA COMPLETĂ</span>
+      <h2>Alege o carte biblică</h2>
+      <p>Explorează cele 66 de cărți ale Bibliei și nivelurile disponibile pentru fiecare.</p>
+      <div class="notice" id="books-status">Se încarcă lista cărților...</div>
+      <div class="book-grid" id="books-grid"></div>
     </section>
   `);
+
+  const status = document.querySelector('#books-status');
+  const grid = document.querySelector('#books-grid');
+
+  const { data, error } = await supabase
+    .from('bible_books')
+    .select('*');
+
+  if (error) {
+    status.textContent = `Nu am putut încărca cărțile: ${error.message}`;
+    return;
+  }
+
+  const books = (data || []).sort((a, b) =>
+    Number(a.sort_order ?? a.position ?? a.id) - Number(b.sort_order ?? b.position ?? b.id)
+  );
+
+  if (!books.length) {
+    status.textContent = 'Nu există cărți în tabelul bible_books.';
+    return;
+  }
+
+  status.remove();
+  grid.innerHTML = books.map(book => {
+    const bookName = book.name || book.title || book.book_name || `Cartea ${book.id}`;
+    const testament = book.testament || book.section || '';
+    return `
+      <button type="button" class="book-card" data-book="${escapeHtml(book.id)}">
+        <span class="book-number">${escapeHtml(book.sort_order ?? book.position ?? book.id)}</span>
+        <strong>${escapeHtml(bookName)}</strong>
+        <small>${escapeHtml(testament)}</small>
+      </button>
+    `;
+  }).join('');
+
+  grid.querySelectorAll('[data-book]').forEach(button => {
+    button.addEventListener('click', () => renderBookLevels(button.dataset.book));
+  });
+}
+
+async function renderBookLevels(bookId) {
+  if (!supabase) return;
+
+  shell(`
+    <section class="panel">
+      <button type="button" class="secondary" data-back-game>← Înapoi la cărți</button>
+      <span class="eyebrow">NIVELURI BIBLICE</span>
+      <h2>Nivelurile cărții</h2>
+      <p>Alege nivelul pe care dorești să îl deschizi.</p>
+      <div class="notice" id="levels-status">Se încarcă nivelurile...</div>
+      <div class="levels" id="book-levels"></div>
+    </section>
+  `);
+
+  const status = document.querySelector('#levels-status');
+  const grid = document.querySelector('#book-levels');
+
+  const { data, error } = await supabase
+    .from('levels')
+    .select('*')
+    .eq('book_id', bookId)
+    .order('book_level', { ascending: true });
+
+  if (error) {
+    status.textContent = `Nu am putut încărca nivelurile: ${error.message}`;
+    return;
+  }
+
+  if (!data?.length) {
+    status.textContent = 'Nu există niveluri asociate acestei cărți.';
+    return;
+  }
+
+  status.remove();
+  grid.innerHTML = data.map(level => {
+    const number = level.book_level ?? level.level_number ?? level.sort_order ?? level.id;
+    const name = level.name || `Nivelul ${number}`;
+    return `
+      <button type="button" class="level level-button" data-level="${escapeHtml(level.id)}">
+        <span>${escapeHtml(number)}</span>
+        ${escapeHtml(name)}
+        <small>Deschide nivelul →</small>
+      </button>
+    `;
+  }).join('');
+
+  grid.querySelectorAll('[data-level]').forEach(button => {
+    button.addEventListener('click', () => renderLevelQuestions(button.dataset.level));
+  });
+}
+
+async function renderLevelQuestions(levelId) {
+  if (!supabase) return;
+
+  shell(`
+    <section class="panel">
+      <button type="button" class="secondary" data-back-game>← Înapoi la cărți</button>
+      <span class="eyebrow">ÎNTREBĂRI BIBLICE</span>
+      <h2>Conținutul nivelului</h2>
+      <div class="notice" id="questions-status">Se încarcă întrebările...</div>
+      <div id="level-questions"></div>
+    </section>
+  `);
+
+  const status = document.querySelector('#questions-status');
+  const list = document.querySelector('#level-questions');
+
+  const { data, error } = await supabase
+    .from('questions')
+    .select('id, prompt, options, bible_reference, explanation')
+    .eq('level_id', levelId)
+    .eq('active', true)
+    .order('id', { ascending: true });
+
+  if (error) {
+    status.textContent = `Nu am putut încărca întrebările: ${error.message}`;
+    return;
+  }
+
+  if (!data?.length) {
+    status.textContent = 'Acest nivel nu are încă întrebări active.';
+    return;
+  }
+
+  status.textContent = `${data.length} întrebări găsite.`;
+  list.innerHTML = data.map((question, index) => {
+    const options = Array.isArray(question.options) ? question.options : [];
+    return `
+      <article class="question-preview">
+        <h3>${index + 1}. ${escapeHtml(question.prompt)}</h3>
+        <ol type="A">
+          ${options.map(option => `<li>${escapeHtml(option)}</li>`).join('')}
+        </ol>
+        <small>${escapeHtml(question.bible_reference || '')}</small>
+      </article>
+    `;
+  }).join('') + `
+    <div class="notice">
+      Întrebările sunt încărcate din baza de date. Modul de joc cu cronometru,
+      verificarea răspunsurilor și acordarea punctelor trebuie activat prin
+      funcții securizate în Supabase înainte de a putea începe competiția.
+    </div>
+  `;
 }
 
 function renderProfile() {
