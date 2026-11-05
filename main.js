@@ -682,6 +682,7 @@ async function renderLevelQuestions(levelId) {
         p_answers: submittedAnswers
       }
     );
+    }
 
     if (error) {
       list.innerHTML = `
