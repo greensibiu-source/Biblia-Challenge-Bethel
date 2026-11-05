@@ -378,17 +378,17 @@ function renderHome() {
     <div class="home-grid">
       <section class="panel progress-card">
         <h3>▣ Progresul tău</h3>
-        <div class="progress-content">
+                <div class="progress-content">
           <div class="progress-circle">
-            <strong>0%</strong>
+            <strong>${myStats.progress}%</strong>
           </div>
           <div>
-            <p>✓ Întrebări corecte: 0</p>
-            <p>✕ Întrebări greșite: 0</p>
-            <p>▤ Jocuri jucate: 0</p>
+            <p>✓ Întrebări corecte: ${myStats.correct}</p>
+            <p>✕ Întrebări greșite: ${myStats.wrong}</p>
+            <p>▤ Jocuri jucate: ${myStats.games}</p>
           </div>
         </div>
-        <small>Progresul va fi actualizat după activarea jocului.</small>
+        <small>Niveluri promovate: ${myStats.passedLevels} din 1320</small>
       </section>
 
       <section class="panel weekly-card">
