@@ -296,21 +296,59 @@ async function dashboard() {
     return;
   }
 
-  const [profileResult, leadersResult] = await Promise.all([
-    supabase
-      .from('profiles')
-      .select('username, role')
-      .eq('id', user.id)
-      .maybeSingle(),
+  const [profileResult, leadersResult, attemptsResult, levelsResult] =
+    await Promise.all([
+      supabase
+        .from('profiles')
+        .select('username, role')
+        .eq('id', user.id)
+        .maybeSingle(),
 
-    supabase
-      .from('leaderboard')
-      .select('username, total_points')
-      .limit(10)
-  ]);
+      supabase
+        .from('leaderboard')
+        .select('username, total_points')
+        .limit(10),
+
+      supabase
+        .from('attempts')
+        .select('level_id, score, passed'),
+
+      supabase
+        .from('levels')
+        .select('id', { count: 'exact', head: true })
+    ]);
 
   profile = profileResult.data;
   leaders = leadersResult.data || [];
+
+  const attempts = attemptsResult.data || [];
+  const totalLevels = levelsResult.count || 1320;
+
+  const passedLevelIds = new Set(
+    attempts
+      .filter(a => a.passed)
+      .map(a => Number(a.level_id))
+  );
+
+  const correct = attempts.reduce(
+    (sum, a) => sum + Math.round(Number(a.score || 0) / 10),
+    0
+  );
+
+  const wrong = attempts.reduce(
+    (sum, a) => sum + (21 - Math.round(Number(a.score || 0) / 10)),
+    0
+  );
+
+  myStats = {
+    games: attempts.length,
+    correct,
+    wrong,
+    passedLevels: passedLevelIds.size,
+    progress: Math.round(
+      (passedLevelIds.size / totalLevels) * 100
+    )
+  };
 
   currentPage = 'home';
   renderHome();
