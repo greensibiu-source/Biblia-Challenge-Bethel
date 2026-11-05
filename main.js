@@ -580,7 +580,7 @@ async function renderLevelQuestions(levelId) {
     .from('questions')
     .select('id, prompt, options')
     .eq('level_id', levelId)
-    .eq('active', true)
+    
     .order('id', { ascending: true });
 
   if (error) {
