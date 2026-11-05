@@ -647,7 +647,7 @@ async function renderLevelQuestions(levelId) {
 
   const { data, error } = await supabase
     .from('questions')
-    .select('id, prompt, options')
+    .select('id, prompt, options, bible_reference')
     .eq('level_id', levelId)
     
     .order('id', { ascending: true });
@@ -680,7 +680,7 @@ async function renderLevelQuestions(levelId) {
 
       <article class="question-preview">
         <h3>${escapeHtml(q.prompt)}</h3>
-
+        <p class="muted"><strong>Referință biblică:</strong> ${escapeHtml(q.bible_reference || 'Nespecificată')}</p>
         <div class="quiz-options">
           ${options.map((option, i) => `
             <button
