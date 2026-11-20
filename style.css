@@ -789,7 +789,7 @@ footer {
     margin-left: auto;
     text-align: right;
   }
-
+}
 @media (max-width: 700px) {
   .app-header {
     padding: 13px 15px;
