@@ -563,7 +563,7 @@ function renderDailyQuiz(questions) {
 
   let index = 0;
   const answers = Array(10).fill(null);
-
+startQuizTimer();
   shell(`
     <section class="panel daily-quiz-panel">
       <button type="button" id="daily-back" class="secondary">
@@ -571,14 +571,16 @@ function renderDailyQuiz(questions) {
       </button>
       <span class="eyebrow">PROVOCAREA ZILEI</span>
       <h2>10 întrebări biblice</h2>
+      <div class="quiz-timer" id="quiz-timer">00:00</div>
       <div id="daily-question"></div>
     </section>
   `);
 
-  document.querySelector("#daily-back").onclick = () => {
-    currentPage = "home";
-    renderHome();
-  };
+document.querySelector("#daily-back").onclick = () => {
+  stopQuizTimer();
+  currentPage = "home";
+  renderHome();
+};
 
   const area = document.querySelector("#daily-question");
 
