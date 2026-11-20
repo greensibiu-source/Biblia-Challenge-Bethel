@@ -760,7 +760,7 @@ function navigate(page) {
       'Biblia Challenge – Bethel Cloppenburg este un proiect dedicat studiului și aprofundării Cuvântului lui Dumnezeu. Scopul platformei este să încurajeze citirea regulată a Bibliei, dezvoltarea cunoștințelor biblice și apropierea de Dumnezeu. Prin întrebări, provocări și clasamente, participanții își pot testa cunoștințele și pot progresa în studiul Scripturii. Ne dorim ca această experiență să fie mai mult decât un concurs: un îndemn la cercetarea Scripturilor și la creștere spirituală. „Cercetați Scripturile, pentru că socotiți că în ele aveți viața veșnică” – Ioan 5:39. Un proiect al Bisericii Penticostale Bethel Cloppenburg, Germania.'
     );
   }
-
+}
 
 function renderRanking() {
   shell(`
