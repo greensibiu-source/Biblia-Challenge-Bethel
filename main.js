@@ -968,7 +968,7 @@ async function renderLevelQuestions(levelId) {
               type="button"
               class="quiz-option ${answers[current] === i ? 'selected' : ''}"
               data-answer="${i}"
-              style="display:block;width:100%;text-align:left;margin:10px 0;padding:15px;border-radius:12px;border:2px solid ${answers[current] === i ? '#27966c' : '#ccc'};background:${answers[current] === i ? '#e5f5ed' : 'transparent'};color:inherit">
+            
               <strong>${String.fromCharCode(65 + i)}.</strong>
               ${escapeHtml(option)}
               ${answers[current] === i ? ' ✓' : ''}
