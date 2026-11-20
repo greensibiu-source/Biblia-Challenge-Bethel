@@ -507,7 +507,11 @@ async function startDailyChallenge() {
     .eq("active", true);
 
   if (error || !data || data.length < 10) {
-    alert("Nu am putut încărca întrebările.");
+    alert(
+  error
+    ? "Eroare Supabase: " + error.message
+    : "Au fost găsite doar " + (data?.length || 0) + " întrebări."
+);
     renderHome();
     return;
   }
