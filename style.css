@@ -782,8 +782,41 @@ footer {
   }
 
   .header-brand {
-    display: none;
-  }
+  display: flex;
+  order: 0;
+  width: 100%;
+  justify-content: flex-end;
+  gap: 7px;
+  text-align: right;
+  margin-bottom: 2px;
+}
+
+.header-brand strong {
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.header-brand span {
+  font-size: 9px;
+  margin-top: 2px;
+  line-height: 1.2;
+}
+
+.church-symbol {
+  width: 25px;
+  height: 25px;
+  font-size: 12px;
+}
+
+.main-brand {
+  order: 1;
+  text-align: left;
+}
+
+.header-user {
+  order: 2;
+  width: 100%;
+}
 
   .main-brand {
     text-align: left;
