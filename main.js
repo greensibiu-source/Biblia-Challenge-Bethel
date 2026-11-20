@@ -637,6 +637,7 @@ document.querySelector("#daily-back").onclick = () => {
   }
 
   function showResult() {
+    const elapsed = stopQuizTimer();
     const score = questions.reduce((sum, q, i) =>
       sum + (Number(q.correct_option) === answers[i] ? 1 : 0), 0
     );
@@ -646,6 +647,7 @@ document.querySelector("#daily-back").onclick = () => {
         <div class="result-star">✦</div>
         <span class="eyebrow">PROVOCAREA ÎNCHEIATĂ</span>
         <h2>${score} / 10</h2>
+        <p class="quiz-finish-time">Timp total: <strong>${elapsed}</strong></p>
         <p>Felicitări! Continuă să cercetezi Scripturile.</p>
         <button type="button" id="daily-review">
           Vezi răspunsurile
