@@ -1094,7 +1094,7 @@ startQuizTimer();
       list.querySelector('#try-result').addEventListener('click', showResult);
       return;
     }
-
+const elapsed = stopQuizTimer();
     const score = Number(result.score);
     const passed = result.passed;
     const angle = -90 + (score / 210) * 180;
@@ -1105,6 +1105,7 @@ startQuizTimer();
     list.innerHTML = `
       <article class="question-preview" style="text-align:center;padding:20px">
         <h2>Rezultatul tău</h2>
+        <p class="quiz-finish-time">Timp total: <strong>${elapsed}</strong></p>
 
         <svg viewBox="0 0 320 185" width="100%" style="max-width:400px">
           <path d="M35 145 A125 125 0 0 1 285 145"
