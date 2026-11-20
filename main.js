@@ -158,7 +158,10 @@ function shell(content) {
   });
 
   document.querySelectorAll('[data-back-game]').forEach(button => {
-    button.addEventListener('click', () => renderGame());
+    button.addEventListener('click', () => {
+  stopQuizTimer();
+  renderGame();
+});
   });
 
   document.querySelector('#logout')?.addEventListener('click', logout);
