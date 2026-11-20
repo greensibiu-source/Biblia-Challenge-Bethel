@@ -1127,6 +1127,7 @@ showQuestion();
 }
 
 
+
 function renderProfile() {
   shell(`
     <section class="panel">
@@ -1135,10 +1136,87 @@ function renderProfile() {
       <p>${escapeHtml(user?.email || '')}</p>
       <p>Rol: ${escapeHtml(profile?.role || 'player')}</p>
       <p>Puncte totale: ${getTotalPoints()}</p>
+
+      <form id="username-form">
+        <label for="profile-username">Schimbă numele de utilizator</label>
+        <input
+          id="profile-username"
+          name="username"
+          type="text"
+          value="${escapeHtml(profile?.username || '')}"
+          minlength="3"
+          maxlength="24"
+          required
+          autocomplete="nickname"
+          placeholder="Noul nume"
+        >
+        <p class="muted">Numele va fi afișat în profil și în clasament.</p>
+        <button type="submit" id="save-username">
+          Salvează modificările
+        </button>
+        <p id="username-message" class="muted" role="status"></p>
+      </form>
+
       <button type="button" id="logout" class="secondary">Deconectare</button>
     </section>
   `);
+
+  const form = document.querySelector('#username-form');
+  const message = document.querySelector('#username-message');
+
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+
+    const newUsername = form.elements.username.value.trim();
+
+    if (newUsername.length < 3 || newUsername.length > 24) {
+      message.textContent = 'Numele trebuie să aibă între 3 și 24 de caractere.';
+      return;
+    }
+
+    if (newUsername === profile?.username) {
+      message.textContent = 'Acesta este deja numele tău.';
+      return;
+    }
+
+    const button = document.querySelector('#save-username');
+    button.disabled = true;
+    message.textContent = 'Se salvează...';
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({ username: newUsername })
+        .eq('id', user.id)
+        .select('username')
+        .single();
+
+      if (error) {
+        message.textContent = error.code === '23505'
+          ? 'Acest nume este deja folosit. Alege altul.'
+          : 'Eroare: ' + error.message;
+        return;
+      }
+
+      profile = { ...profile, username: data.username };
+
+      const { data: updatedLeaders, error: leadersError } =
+        await supabase.rpc('get_leaderboard').limit(10);
+
+      if (!leadersError) leaders = updatedLeaders || [];
+
+      renderProfile();
+      document.querySelector('#username-message').textContent =
+        'Numele a fost schimbat cu succes!';
+    } catch (error) {
+      message.textContent = 'A apărut o eroare. Încearcă din nou.';
+    } finally {
+      const currentButton = document.querySelector('#save-username');
+      if (currentButton) currentButton.disabled = false;
+    }
+  });
 }
+
 
 function renderSimplePage(title, description) {
   shell(`
