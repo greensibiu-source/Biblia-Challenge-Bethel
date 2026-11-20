@@ -22,27 +22,45 @@ let myStats = {
   progress: 0
 };
 let currentPage = 'home';
+
 let quizTimerInterval = null;
 let quizStartTime = null;
 
 function startQuizTimer() {
   clearInterval(quizTimerInterval);
   quizStartTime = Date.now();
+
+  const updateTimer = () => {
+    const timer = document.querySelector("#quiz-timer");
+    if (timer) {
+      timer.textContent = getQuizElapsedTime();
+    }
+  };
+
+  updateTimer();
+  quizTimerInterval = setInterval(updateTimer, 1000);
 }
 
 function getQuizElapsedTime() {
+  if (!quizStartTime) return "00:00";
+
   const seconds = Math.floor((Date.now() - quizStartTime) / 1000);
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
 
-  return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+  return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
 }
 
 function stopQuizTimer() {
+  const elapsed = getQuizElapsedTime();
+
   clearInterval(quizTimerInterval);
   quizTimerInterval = null;
-  return getQuizElapsedTime();
+
+  return elapsed;
 }
+
+
 const levels = [
   'Începător I', 'Începător II',
   'Explorator I', 'Explorator II',
