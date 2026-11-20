@@ -40,9 +40,7 @@ const menuItems = [
   { id: 'home', icon: '⌂', label: 'Acasă' },
   { id: 'game', icon: '♧', label: 'Joc nou' },
   { id: 'ranking', icon: '🏆', label: 'Clasament' },
-  { id: 'achievements', icon: '✧', label: 'Realizări' },
   { id: 'profile', icon: '♙', label: 'Profil' },
-  { id: 'settings', icon: '⚙', label: 'Setări' },
   { id: 'about', icon: 'ⓘ', label: 'Despre' }
 ];
 
@@ -1134,7 +1132,6 @@ function renderProfile() {
       <span class="eyebrow">CONTUL TĂU</span>
       <h2>${escapeHtml(profile?.username || 'Participant')}</h2>
       <p>${escapeHtml(user?.email || '')}</p>
-      <p>Rol: ${escapeHtml(profile?.role || 'player')}</p>
       <p>Puncte totale: ${getTotalPoints()}</p>
 
       <form id="username-form">
