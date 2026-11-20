@@ -22,7 +22,27 @@ let myStats = {
   progress: 0
 };
 let currentPage = 'home';
+let quizTimerInterval = null;
+let quizStartTime = null;
 
+function startQuizTimer() {
+  clearInterval(quizTimerInterval);
+  quizStartTime = Date.now();
+}
+
+function getQuizElapsedTime() {
+  const seconds = Math.floor((Date.now() - quizStartTime) / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+
+  return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+}
+
+function stopQuizTimer() {
+  clearInterval(quizTimerInterval);
+  quizTimerInterval = null;
+  return getQuizElapsedTime();
+}
 const levels = [
   'Începător I', 'Începător II',
   'Explorator I', 'Explorator II',
