@@ -485,7 +485,7 @@ function renderHome() {
       <h3>✦ Versetul zilei</h3>
       <blockquote>„${escapeHtml(verse.text)}”</blockquote>
       <strong>${escapeHtml(verse.ref)}</strong>
-      <small>Verset nou în fiecare zi.</small>
+      
     </section>
   `);
 
