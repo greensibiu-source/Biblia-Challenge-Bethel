@@ -960,3 +960,60 @@ footer {
   outline: 2px solid #e4bd67;
   outline-offset: 3px;
 }
+
+/* Design elegant – Provocarea zilei */
+.daily-options {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.daily-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 64px;
+  padding: 16px;
+  border: 1px solid #b99a59;
+  border-radius: 14px;
+  background: #14283b;
+  color: #f4eddd;
+  text-align: left;
+  font: inherit;
+  font-weight: 700;
+  box-sizing: border-box;
+  box-shadow: none;
+}
+
+.daily-option span {
+  color: #e8c77c;
+  font-weight: 800;
+}
+
+.daily-option.selected {
+  background: #245b49;
+  border: 2px solid #65c49a;
+  color: #ffffff;
+}
+
+.daily-option.selected span {
+  color: #ffffff;
+}
+
+#daily-next {
+  display: block;
+  width: 100%;
+  margin-top: 18px;
+  padding: 16px;
+  border: 0;
+  border-radius: 14px;
+  background: #d6b15e;
+  color: #102033;
+  font-weight: 800;
+}
+
+#daily-next:disabled {
+  opacity: .45;
+}
