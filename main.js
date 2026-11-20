@@ -997,12 +997,14 @@ async function renderLevelQuestions(levelId) {
 
   let current = 0;
   const answers = new Array(data.length).fill(null);
+startQuizTimer();
 
   function showQuestion() {
     const q = data[current];
     const options = Array.isArray(q.options) ? q.options : [];
 
     list.innerHTML = `
+    <div class="quiz-timer" id="quiz-timer">00:00</div>
       <p><strong>Întrebarea ${current + 1} din ${data.length}</strong></p>
 
       <div class="quiz-progress">
