@@ -774,6 +774,21 @@ footer {
 }
 
 /* Ecrane mici */
+@media (min-width: 701px) {
+  .main-brand {
+    order: 1;
+    text-align: left;
+  }
+
+  .header-user {
+    order: 2;
+  }
+
+  .header-brand {
+    order: 3;
+    margin-left: auto;
+    text-align: right;
+  }
 
 @media (max-width: 700px) {
   .app-header {
