@@ -1017,3 +1017,109 @@ footer {
 #daily-next:disabled {
   opacity: .45;
 }
+
+.daily-review-header {
+  text-align: center;
+  padding: 22px 12px;
+  margin-bottom: 20px;
+  background: #14283b;
+  border: 1px solid #b99a59;
+  border-radius: 16px;
+}
+
+.daily-review-header h2 {
+  color: #e8c77c;
+  font-size: 28px;
+  margin: 12px 0;
+}
+
+.daily-review-header p {
+  color: #f4eddd;
+}
+
+.daily-review-item {
+  padding: 18px;
+  margin: 16px 0;
+  border-radius: 16px;
+  background: #14283b;
+  border: 1px solid #526174;
+}
+
+.daily-review-item.is-correct {
+  border-left: 5px solid #65c49a;
+}
+
+.daily-review-item.is-wrong {
+  border-left: 5px solid #ef7777;
+}
+
+.review-question-heading {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.review-question-heading h3 {
+  color: #e8c77c;
+  margin-top: 0;
+  flex: 1;
+}
+
+.review-status {
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.is-correct .review-status {
+  color: #65c49a;
+}
+
+.is-wrong .review-status {
+  color: #ff8585;
+}
+
+.review-answer {
+  padding: 14px;
+  margin: 12px 0;
+  border-radius: 12px;
+  color: #f4eddd;
+}
+
+.review-answer p {
+  margin-bottom: 0;
+}
+
+.correct-answer {
+  background: #193c35;
+  border: 1px solid #65c49a;
+}
+
+.wrong-answer {
+  background: #452b32;
+  border: 1px solid #ef7777;
+}
+
+.review-reference {
+  color: #e8c77c;
+  margin-top: 16px;
+  font-size: 14px;
+}
+
+.review-explanation {
+  background: #1c3045;
+  padding: 14px;
+  border-radius: 12px;
+  margin-top: 14px;
+  color: #d2dbe5;
+}
+
+.review-explanation strong {
+  color: #e8c77c;
+}
+
+.review-explanation p {
+  margin-bottom: 0;
+  line-height: 1.6;
+}
