@@ -658,7 +658,65 @@ document.querySelector("#daily-back").onclick = () => {
       </div>
     `;
 
-    area.querySelector("#daily-review").onclick = () => {
+    
+area.querySelector("#daily-review").onclick = () => {
+  area.innerHTML = `
+    <div class="daily-review-header">
+      <span class="eyebrow">VERIFICAREA RĂSPUNSURILOR</span>
+      <h2>${questions.reduce((sum, q, i) =>
+        sum + (Number(q.correct_option) === answers[i] ? 1 : 0), 0)} / 10 corecte</h2>
+      <p>Timp total: <strong>${elapsed}</strong></p>
+    </div>
+
+    ${questions.map((q, i) => {
+      const isCorrect = Number(q.correct_option) === answers[i];
+
+      return `
+        <article class="daily-review-item ${isCorrect ? "is-correct" : "is-wrong"}">
+          <div class="review-question-heading">
+            <h3>${i + 1}. ${escapeHtml(q.prompt)}</h3>
+            <span class="review-status">
+              ${isCorrect ? "✓ Corect" : "✕ Greșit"}
+            </span>
+          </div>
+
+          <div class="review-answer ${isCorrect ? "correct-answer" : "wrong-answer"}">
+            <strong>Răspunsul tău</strong>
+            <p>${escapeHtml(q.options[answers[i]])}</p>
+          </div>
+
+          ${!isCorrect ? `
+            <div class="review-answer correct-answer">
+              <strong>Răspuns corect</strong>
+              <p>${escapeHtml(q.options[Number(q.correct_option)])}</p>
+            </div>
+          ` : ""}
+
+          <p class="review-reference">
+            Referință biblică: ${escapeHtml(q.bible_reference || "Nespecificată")}
+          </p>
+
+          ${q.explanation ? `
+            <div class="review-explanation">
+              <strong>Explicație biblică</strong>
+              <p>${escapeHtml(q.explanation)}</p>
+            </div>
+          ` : ""}
+        </article>
+      `;
+    }).join("")}
+
+    <button type="button" id="daily-finish">
+      Înapoi acasă
+    </button>
+  `;
+
+  area.querySelector("#daily-finish").onclick = () => {
+    currentPage = "home";
+    renderHome();
+  };
+};
+
       area.innerHTML = questions.map((q, i) => `
         <article class="daily-review-item">
           <h3>${i + 1}. ${escapeHtml(q.prompt)}</h3>
