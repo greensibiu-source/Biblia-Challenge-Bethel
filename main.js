@@ -717,27 +717,7 @@ area.querySelector("#daily-review").onclick = () => {
   };
 };
 
-      area.innerHTML = questions.map((q, i) => `
-        <article class="daily-review-item">
-          <h3>${i + 1}. ${escapeHtml(q.prompt)}</h3>
-          <p>Răspunsul tău:
-            ${escapeHtml(q.options[answers[i]])}</p>
-          <p class="answer-correct">Corect:
-            ${escapeHtml(q.options[Number(q.correct_option)])}</p>
-          <small>${escapeHtml(q.bible_reference || "")}</small>
-          <p>${escapeHtml(q.explanation || "")}</p>
-        </article>
-      `).join("") + `
-        <button type="button" id="daily-finish">
-          Înapoi acasă
-        </button>
-      `;
-
-      area.querySelector("#daily-finish").onclick = () => {
-        currentPage = "home";
-        renderHome();
-      };
-    };
+      
   }
 
   showQuestion();
